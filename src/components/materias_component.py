@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 from src.model.materias import Materia
 
 
@@ -8,7 +8,7 @@ with open("src/data/materias.json", encoding="utf-8") as f:
 
 
 materias: Dict[str, Materia] = {}
-
+materias_cursadas: Set[str] = set()
 
 def get_materias() -> Dict[str, Materia]:
     if materias:
@@ -21,6 +21,7 @@ def get_materias() -> Dict[str, Materia]:
             prerequisitos=m["prerequisitos"],
             obrigatoria=m["obrigatoria"]
         )
+        print("-", materias[codigo].codigo, ":", materias[codigo].nome)
 
     return materias
 
@@ -29,11 +30,12 @@ def get_materia(codigo: str) -> Optional[Materia]:
     return get_materias().get(codigo)
 
 
-def verificar_prerequisitos(materias_cursadas: List[str], materia: Materia) -> bool:
+def verificar_prerequisitos(materias_cursadas: Set[str], materia: Materia) -> bool:
     return all(pr in materias_cursadas for pr in materia.prerequisitos)
 
+
 def verificar_materias_disponiveis(
-    materias_cursadas: List[str],
+    materias_cursadas: Set[str],
     tipo: str = "todas"
 ) -> List[Materia]:
 
@@ -58,18 +60,22 @@ def verificar_materias_disponiveis(
     return materias_disponiveis
 
 
+def adicionar_materia(
+    materias_cursadas: Set[str],
+    codigo: str
+) -> Set[str]:
 
-for codigo, materia in get_materias().items():
-    print(codigo, materia.nome)
+    if codigo in materias_cursadas:
+        return materias_cursadas
 
+    materia = get_materia(codigo)
 
+    if not materia:
+        return materias_cursadas
 
-for codigo, materia in get_materias().items():
-    if materia.obrigatoria:
-        print(f"{codigo} - {materia.nome} é obrigatória")
+    materias_cursadas.add(codigo)
 
+    for pr in materia.prerequisitos:
+        adicionar_materia(materias_cursadas, pr)
 
-
-for codigo, materia in get_materias().items():
-    if not materia.obrigatoria:
-        print(f"{codigo} - {materia.nome} é eletiva")
+    return materias_cursadas
