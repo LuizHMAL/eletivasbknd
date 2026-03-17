@@ -10,24 +10,45 @@ with open("src/data/materias.json", encoding="utf-8") as f:
 materias: Dict[str, Materia] = {}
 materias_cursadas: Set[str] = set()
 
-def get_materias() -> Dict[str, Materia]:
-    if materias:
-        return materias
+cache = {}
+
+def get_materias(tipo: str) -> Dict[str, Materia]:
+    if tipo in cache:
+        return cache[tipo]
+
+    materias = {}
 
     for codigo, m in data["disciplinas"].items():
+        if tipo == "todas":
+            pass
+        elif tipo == "obrigatorias" and not m["obrigatoria"]:
+            continue
+        elif tipo == "eletivas" and m["obrigatoria"]:
+            continue
+
         materias[codigo] = Materia(
             nome=m["nome"],
             codigo=codigo,
             prerequisitos=m["prerequisitos"],
             obrigatoria=m["obrigatoria"]
         )
-        print("-", materias[codigo].codigo, ":", materias[codigo].nome)
 
+    cache[tipo] = materias
     return materias
 
 
+
+
+
+
+    
 def get_materia(codigo: str) -> Optional[Materia]:
     return get_materias().get(codigo)
+
+
+
+
+
 
 
 def verificar_prerequisitos(materias_cursadas: Set[str], materia: Materia) -> bool:
@@ -54,9 +75,9 @@ def verificar_materias_disponiveis(
 
         if tipo == "obrigatorias" and not materia.obrigatoria:
             continue
-
+        print("DEBUG -> matéria disponível:", materia.codigo, "-", materia.nome)
         materias_disponiveis.append(materia)
-
+        
     return materias_disponiveis
 
 
