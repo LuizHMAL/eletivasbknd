@@ -41,10 +41,9 @@ def get_materias(tipo: str) -> Dict[str, Materia]:
 
 
 
-    
-def get_materia(codigo: str) -> Optional[Materia]:
-    return get_materias().get(codigo)
-
+def get_materia(codigo: str):
+    materias = get_materias("todas") 
+    return materias.get(codigo)
 
 
 

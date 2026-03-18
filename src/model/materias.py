@@ -23,4 +23,9 @@ class TipoMateria(Enum):
 
 class MateriasResponse(BaseModel):
     materias: list[Materia]
+
+
+class MateriaSimpleSelectResponse(BaseModel):
+    codigo: str
+    
     
